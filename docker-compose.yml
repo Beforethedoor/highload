@@ -33,12 +33,47 @@ services:
     container_name: "postgres"
     volumes:
       - pg_data:/var/lib/postgresql/data/
-    expose:
-      - 5432
     environment:
       - POSTGRES_USER=django
       - POSTGRES_PASSWORD=django_QWErty!2)4
       - POSTGRES_DB=django
+
+  # pgbouncer service
+  pgbouncer:
+    image: edoburu/pgbouncer
+    container_name: "pgbouncer"
+    environment:
+      - DB_USER=django
+      - DB_PASSWORD=django_QWErty!2)4
+      - DB_HOST=db
+      - DB_NAME=django
+      - POOL_MODE=transaction
+      - ADMIN_USERS=postgres,dbuser
+    ports:
+      - "5432:5432"
+    depends_on:
+      - db
+
+  # celery service
+  celery:
+    container_name: "celery"
+    build: ./mysite
+    command: celery -A mysite worker -l INFO
+    volumes:
+      - ./mysite:/mysite
+    environment:
+      - DATABASE_URL=postgresql://django:django_QWErty!2)4@db:5432/django
+      - DEBUG=1
+      - CELERY_BROKER=redis://redis:6379/0
+      - CELERY_BACKEND=redis://redis:6379/0
+    depends_on:
+      - mysite
+      - redis
+
+  # redis service
+  redis:
+    container_name: "redis"
+    image: "redis:alpine"
 
 volumes:
   pg_data:
