@@ -1,0 +1,45 @@
+version: "3.9"
+services:
+
+  # nginx service
+  nginx:
+    container_name: "nginx"
+    image: nginx:1.19.8-alpine
+    depends_on:
+      - mysite
+    ports:
+      - "80:80"
+    volumes:
+      - static_data:/var/www/html/static
+      - ./conf.d:/etc/nginx/conf.d
+
+  # application service
+  mysite:
+    container_name: "mysite"
+    build: ./mysite
+    command: sh -c "gunicorn --bind 0.0.0.0:8000 mysite.wsgi"
+    volumes:
+      - ./mysite:/mysite
+      - static_data:/project/static
+    expose:
+      - 8000
+    environment:
+      - DATABASE_URL=postgresql://django:django_QWErty!2)4@db:5432/django
+      - DEBUG=1
+
+  # database service
+  db:
+    image: postgres:13-alpine
+    container_name: "postgres"
+    volumes:
+      - pg_data:/var/lib/postgresql/data/
+    expose:
+      - 5432
+    environment:
+      - POSTGRES_USER=django
+      - POSTGRES_PASSWORD=django_QWErty!2)4
+      - POSTGRES_DB=django
+
+volumes:
+  pg_data:
+  static_data:
