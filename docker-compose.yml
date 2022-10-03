@@ -40,7 +40,7 @@ services:
 
   # pgbouncer service
   pgbouncer:
-    image: edoburu/pgbouncer
+    image: edoburu/pgbouncer:1.17.0
     container_name: "pgbouncer"
     environment:
       - DB_USER=django
@@ -57,6 +57,7 @@ services:
   # celery service
   celery:
     container_name: "celery"
+    image: celery:4.0.2
     build: ./mysite
     command: celery -A mysite worker -l INFO
     volumes:
@@ -73,7 +74,7 @@ services:
   # redis service
   redis:
     container_name: "redis"
-    image: "redis:alpine"
+    image: "redis:7.0.5-alpine"
 
 volumes:
   pg_data:
